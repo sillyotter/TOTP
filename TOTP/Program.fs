@@ -51,7 +51,7 @@ let base32encode (data : byte []) =
     Encoding.ASCII.GetString cvtdata
 
 let truncate (data : byte []) : uint32 = 
-    let offset = int (Seq.last (data) &&& 0xfuy)
+    let offset = int ((data.[data.Length-1]) &&& 0xfuy)
     ((uint32 (data.[offset + 0] &&& 0x7fuy) <<< 24) ||| 
      (uint32 (data.[offset + 1] &&& 0xffuy) <<< 16) ||| 
      (uint32 (data.[offset + 2] &&& 0xffuy) <<< 8 ) ||| 
@@ -80,7 +80,17 @@ let main _ =
 
     printfn "%s" p
 
-    for _ in 1..1000 do
-        printfn "%06d" (TOTP())
-        Thread.Sleep(10 * 1000)
+    printfn "%O\t%06d" DateTime.Now (TOTP())
+
+    let now = DateTime.Now
+    let topOfMin = DateTime(
+                    now.Year, 
+                    now.Month, 
+                    now.Day, 
+                    now.Hour, 
+                    (if (now.Second > 30) then now.Minute+1 else now.Minute), 
+                    (if (now.Second > 30) then 0 else 30))
+    let due = topOfMin-now
+    use t = new Timer( (fun _ -> (printfn "%O\t%06d" DateTime.Now (TOTP()))), null,  due, TimeSpan.FromSeconds(30.0))
+    Console.ReadKey() |> ignore
     0

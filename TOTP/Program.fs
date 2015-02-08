@@ -67,6 +67,13 @@ let counter() =
     |> Array.rev
 
 let secret() = "ASDFASDFASDFASDFSADF" |> Encoding.ASCII.GetBytes
+
+let gensecret() = 
+    let buf = Array.zeroCreate<byte>(20)
+    use rng = RNGCryptoServiceProvider.Create()
+    rng.GetBytes buf
+    buf
+
 let TOTP() = (HMAC (secret()) (counter())) |> truncate
 
 [<EntryPoint>]
@@ -79,6 +86,15 @@ let main _ =
         |> Seq.reduce (+)
 
     printfn "%s" p
+
+    let p2 = 
+        gensecret()
+        |> base32encode 
+        |> groupsOfAtMost 3
+        |> Seq.map (fun x -> String(Seq.toArray x) + " ")
+        |> Seq.reduce (+)
+
+    printfn "%s" p2
 
     printfn "%O\t%06d" DateTime.Now (TOTP())
 

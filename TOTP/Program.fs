@@ -72,7 +72,8 @@ let TOTP() = (HMAC (secret()) (counter())) |> truncate
 [<EntryPoint>]
 let main _ = 
     let p = 
-        base32encode (secret())
+        secret()
+        |> base32encode 
         |> groupsOfAtMost 3
         |> Seq.map (fun x -> String(Seq.toArray x) + " ")
         |> Seq.reduce (+)

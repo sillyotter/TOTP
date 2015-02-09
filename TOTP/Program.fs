@@ -61,8 +61,11 @@ let HMAC (K : byte []) (C : byte []) =
     use hmac = new HMACSHA1(K)
     hmac.ComputeHash C
 
-let counter() = 
+let counter(mutate :(uint64 -> uint64) option) = 
     uint64 (Math.Round((DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalSeconds)) / 30UL
+    |> match mutate with 
+        | Some(func) -> func
+        | None -> id
     |> BitConverter.GetBytes
     |> Array.rev
 
@@ -74,7 +77,15 @@ let gensecret() =
     rng.GetBytes buf
     buf
 
-let TOTP() = (HMAC (secret()) (counter())) |> truncate
+
+let genTOTP counter secret = (HMAC secret counter) |> truncate
+let genTOTPNow secret = genTOTP (counter(None)) secret
+let genTOTPAroundNow secret = seq {
+     yield genTOTP (counter(None)) secret
+     yield genTOTP (counter(Some(fun x -> x - 1UL))) secret
+     yield genTOTP (counter(Some(fun x -> x + 1UL))) secret
+     }
+
 
 [<EntryPoint>]
 let main _ = 
@@ -87,16 +98,7 @@ let main _ =
 
     printfn "%s" p
 
-    let p2 = 
-        gensecret()
-        |> base32encode 
-        |> groupsOfAtMost 3
-        |> Seq.map (fun x -> String(Seq.toArray x) + " ")
-        |> Seq.reduce (+)
-
-    printfn "%s" p2
-
-    printfn "%O\t%06d" DateTime.Now (TOTP())
+    printfn "%O\t%06d" DateTime.Now (genTOTPNow (secret()))
 
     let now = DateTime.Now
     let topOfMin = DateTime(
@@ -106,7 +108,8 @@ let main _ =
                     now.Hour, 
                     (if (now.Second > 30) then now.Minute+1 else now.Minute), 
                     (if (now.Second > 30) then 0 else 30))
+
     let due = topOfMin-now
-    use t = new Timer( (fun _ -> (printfn "%O\t%06d" DateTime.Now (TOTP()))), null,  due, TimeSpan.FromSeconds(30.0))
+    use t = new Timer( (fun _ -> (printfn "%O\t%06d" DateTime.Now (genTOTPNow(secret())))), null,  due, TimeSpan.FromSeconds(30.0))
     Console.ReadKey() |> ignore
     0

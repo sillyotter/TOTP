@@ -79,7 +79,6 @@ let gensecret() =
     rng.GetBytes buf
     buf
 
-
 let genTOTP counter secret = (HMAC secret counter) |> truncate
 let genTOTPNow secret = genTOTP (counter(None)) secret
 let genTOTPAroundNow secret = seq {
@@ -87,7 +86,6 @@ let genTOTPAroundNow secret = seq {
      yield genTOTP (counter(Some(fun x -> x - 1UL))) secret
      yield genTOTP (counter(Some(fun x -> x + 1UL))) secret
      }
-
 
 [<EntryPoint>]
 let main _ = 

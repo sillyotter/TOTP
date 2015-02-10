@@ -6,20 +6,21 @@ open System.Threading
 let base32alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567" |> Encoding.ASCII.GetBytes
 let valToChar (b : byte) = base32alphabet.[int (b)]
 
-let groupsOfAtMost (size : int) = 
-    Seq.mapi (fun i x -> i / size, x)
-    >> Seq.groupBy (fun (i, _) -> i)
-    >> Seq.map (fun (_, vs) -> 
-           vs
-           |> Seq.map (fun (_, b) -> b)
-           |> Seq.toList)
+module Seq =
+    let groupsOfAtMost (size : int) = 
+        Seq.mapi (fun i x -> i / size, x)
+        >> Seq.groupBy (fun (i, _) -> i)
+        >> Seq.map (fun (_, vs) -> 
+               vs
+               |> Seq.map (fun (_, b) -> b)
+               |> Seq.toList)
 
 let base32encode (data : byte []) = 
     let leftover = data.Length % 5
     
     let cvtdata = 
         data
-        |> groupsOfAtMost 5
+        |> Seq.groupsOfAtMost 5
         |> Seq.map (fun x -> 
                match x with
                | [ a; b; c; d; e ] -> (a, b, c, d, e)
@@ -92,7 +93,7 @@ let main _ =
     let p = 
         secret()
         |> base32encode 
-        |> groupsOfAtMost 3
+        |> Seq.groupsOfAtMost 3
         |> Seq.map (fun x -> String(Seq.toArray x) + " ")
         |> Seq.reduce (+)
 

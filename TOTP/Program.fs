@@ -8,11 +8,12 @@ let valToChar (b : byte) = base32alphabet.[int (b)]
 
 module Seq =
     let groupsOfAtMost (size : int) = 
-        Seq.mapi (fun i x -> i / size, x)
-        >> Seq.groupBy (fun (i, _) -> i)
+        Seq.mapi (fun i v -> i / size, i, v)
+        >> Seq.groupBy (fun (g, _, _) -> g) 
         >> Seq.map (fun (_, vs) -> 
                vs
-               |> Seq.map (fun (_, b) -> b)
+               |> Seq.sortBy(fun (_, i, _) -> i) // Ive seen no reason to believe groupby changes the order of the elements, but no reason to assume it doesnt either.
+               |> Seq.map (fun (_, _, v) -> v)
                |> Seq.toList)
 
 let base32encode (data : byte []) = 

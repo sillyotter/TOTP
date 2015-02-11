@@ -71,8 +71,6 @@ let counter(mutate :(uint64 -> uint64) option) =
     |> BitConverter.GetBytes
     |> Array.rev
 
-let secret() = "ASDFASDFASDFASDFSADF" |> Encoding.ASCII.GetBytes
-
 let gensecret() = 
     let buf = Array.zeroCreate<byte>(20)
     use rng = RNGCryptoServiceProvider.Create()
@@ -89,16 +87,16 @@ let genTOTPAroundNow secret = seq {
 
 [<EntryPoint>]
 let main _ = 
-    let p = 
-        secret()
-        |> base32encode 
-        |> Seq.groupsOfAtMost 3
-        |> Seq.map (fun x -> String(Seq.toArray x) + " ")
-        |> Seq.reduce (+)
+    let secret = "ASDFASDFASDFASDFSADF" |> Encoding.ASCII.GetBytes
 
-    printfn "%s" p
+    secret
+    |> base32encode 
+    |> Seq.groupsOfAtMost 3
+    |> Seq.map (fun x -> String(Seq.toArray x) + " ")
+    |> Seq.reduce (+)
+    |> printfn "%s"
 
-    printfn "%O\t%06d" DateTime.Now (genTOTPNow (secret()))
+    printfn "%O\t%06d" DateTime.Now (genTOTPNow secret)
 
     let now = DateTime.Now
     let topOfMin = DateTime(
@@ -110,6 +108,6 @@ let main _ =
                     (if (now.Second > 30) then 0 else 30))
 
     let due = topOfMin-now
-    use t = new Timer( (fun _ -> (printfn "%O\t%06d" DateTime.Now (genTOTPNow(secret())))), null,  due, TimeSpan.FromSeconds(30.0))
+    use t = new Timer( (fun _ -> (printfn "%O\t%06d" DateTime.Now (genTOTPNow secret))), null,  due, TimeSpan.FromSeconds(30.0))
     Console.ReadKey() |> ignore
     0

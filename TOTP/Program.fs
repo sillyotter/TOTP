@@ -87,8 +87,9 @@ let genTOTPAroundNow secret = seq {
 
 [<EntryPoint>]
 let main _ = 
-    "ASDFASDFASDFASDFSADF" 
-    |> Encoding.ASCII.GetBytes
+    let secret = "ASDFASDFASDFASDFSADF" |> Encoding.ASCII.GetBytes
+
+    secret
     |> base32encode 
     |> Seq.groupsOfAtMost 3
     |> Seq.map (fun x -> String(Seq.toArray x) + " ")

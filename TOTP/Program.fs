@@ -12,13 +12,12 @@ module Seq =
         >> Seq.groupBy (fun (g, _, _) -> g) 
         >> Seq.map (fun (_, vs) -> 
                vs
-               |> Seq.sortBy(fun (_, i, _) -> i) // Ive seen no reason to believe groupby changes the order of the elements, but no reason to assume it doesnt either.
+               |> Seq.sortBy(fun (_, i, _) -> i)
                |> Seq.map (fun (_, _, v) -> v)
                |> Seq.toList)
 
 let base32encode (data : byte []) = 
     let leftover = data.Length % 5
-    
     let cvtdata = 
         data
         |> Seq.groupsOfAtMost 5

@@ -7,7 +7,7 @@ $paketboot = ".paket\paket.bootstrapper.exe"
 
 if (-Not (Test-Path $paketboot))
 {
-	Invoke-WebRequest "https://github.com/fsprojects/Paket/releases/download/0.27.17/paket.bootstrapper.exe" -OutFile $paketboot
+	Invoke-WebRequest "https://github.com/fsprojects/Paket/releases/download/0.35.0/paket.bootstrapper.exe" -OutFile $paketboot
 }
 
 Start-Process $paketboot -NoNewWindow -Wait

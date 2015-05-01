@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [ ! -f .paket/paket.bootstrapper.exe ]; then
-    curl -L -o .paket/paket.bootstrapper.exe https://github.com/fsprojects/Paket/releases/download/0.35.0/paket.bootstrapper.exe
+    curl -L -o .paket/paket.bootstrapper.exe https://github.com/fsprojects/Paket/releases/download/1.3.0/paket.bootstrapper.exe
 fi
 
 mono .paket/paket.bootstrapper.exe

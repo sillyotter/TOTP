@@ -15,7 +15,6 @@
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <Tailcalls>false</Tailcalls>
     <OutputPath>bin\Debug\</OutputPath>
@@ -25,6 +24,7 @@
     <DocumentationFile>bin\Debug\OTOP.XML</DocumentationFile>
     <Prefer32Bit>true</Prefer32Bit>
     <Externalconsole>true</Externalconsole>
+    <GenerateTailCalls>true</GenerateTailCalls>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -36,6 +36,8 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
     <DocumentationFile>bin\Release\OTOP.XML</DocumentationFile>
     <Prefer32Bit>true</Prefer32Bit>
+    <DebugSymbols>true</DebugSymbols>
+    <GenerateTailCalls>true</GenerateTailCalls>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="mscorlib" />

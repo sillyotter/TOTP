@@ -7,21 +7,21 @@ let base32alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567" |> Encoding.ASCII.GetByt
 let valToChar (b : byte) = base32alphabet.[int (b)]
 
 module Seq =
-    let groupsOfAtMost (size : int) = 
+    let groupsOfAtMost (size : int) =
         Seq.mapi (fun i v -> i / size, i, v)
-        >> Seq.groupBy (fun (g, _, _) -> g) 
-        >> Seq.map (fun (_, vs) -> 
+        >> Seq.groupBy (fun (g, _, _) -> g)
+        >> Seq.map (fun (_, vs) ->
                vs
                |> Seq.sortBy(fun (_, i, _) -> i)
                |> Seq.map (fun (_, _, v) -> v)
                |> Seq.toList)
 
-let base32encode (data : byte []) = 
+let base32encode (data : byte []) =
     let leftover = data.Length % 5
-    let cvtdata = 
+    let cvtdata =
         data
         |> Seq.groupsOfAtMost 5
-        |> Seq.map (fun x -> 
+        |> Seq.map (fun x ->
                match x with
                | [ a; b; c; d; e ] -> (a, b, c, d, e)
                | [ a; b; c; d ] -> (a, b, c, d, 0uy)
@@ -29,7 +29,7 @@ let base32encode (data : byte []) =
                | [ a; b ] -> (a, b, 0uy, 0uy, 0uy)
                | [ a ] -> (a, 0uy, 0uy, 0uy, 0uy)
                | _ -> (0uy, 0uy, 0uy, 0uy, 0uy))
-        |> Seq.map (fun (c1, c2, c3, c4, c5) -> 
+        |> Seq.map (fun (c1, c2, c3, c4, c5) ->
                [ valToChar (c1 >>> 3)
                  valToChar (((c1 &&& 0b111uy) <<< 2) ||| (c2 >>> 6))
                  valToChar (((c2 &&& 0b111110uy) >>> 1))
@@ -40,7 +40,7 @@ let base32encode (data : byte []) =
                  valToChar (((c5 &&& 0b11111uy))) ])
         |> Seq.concat
         |> Seq.toArray
-    
+
     let padding = "======" |> Encoding.ASCII.GetBytes
     let cvtlen = cvtdata.Length
     match leftover with
@@ -51,26 +51,26 @@ let base32encode (data : byte []) =
     | _ -> ()
     Encoding.ASCII.GetString cvtdata
 
-let truncate (data : byte []) : uint32 = 
+let truncate (data : byte []) : uint32 =
     let offset = int ((data.[data.Length-1]) &&& 0xfuy)
-    ((uint32 (data.[offset + 0] &&& 0x7fuy) <<< 24) ||| 
-     (uint32 (data.[offset + 1] &&& 0xffuy) <<< 16) ||| 
-     (uint32 (data.[offset + 2] &&& 0xffuy) <<< 8 ) ||| 
+    ((uint32 (data.[offset + 0] &&& 0x7fuy) <<< 24) |||
+     (uint32 (data.[offset + 1] &&& 0xffuy) <<< 16) |||
+     (uint32 (data.[offset + 2] &&& 0xffuy) <<< 8 ) |||
      (uint32 (data.[offset + 3] &&& 0xffuy))) % 1000000ul
 
-let HMAC (K : byte []) (C : byte []) = 
+let HMAC (K : byte []) (C : byte []) =
     use hmac = new HMACSHA1(K)
     hmac.ComputeHash C
 
-let counter(mutate :(uint64 -> uint64) option) = 
+let counter(mutate :(uint64 -> uint64) option) =
     uint64 (Math.Round((DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalSeconds)) / 30UL
-    |> match mutate with 
+    |> match mutate with
         | Some(func) -> func
         | None -> id
     |> BitConverter.GetBytes
     |> Array.rev
 
-let gensecret() = 
+let gensecret() =
     let buf = Array.zeroCreate<byte>(20)
     use rng = RNGCryptoServiceProvider.Create()
     rng.GetBytes buf
@@ -85,11 +85,11 @@ let genTOTPAroundNow secret = seq {
      }
 
 [<EntryPoint>]
-let main _ = 
+let main _ =
     let secret = "ASDFASDFASDFASDFSADF" |> Encoding.ASCII.GetBytes
 
     secret
-    |> base32encode 
+    |> base32encode
     |> Seq.groupsOfAtMost 3
     |> Seq.map (fun x -> String(Seq.toArray x) + " ")
     |> Seq.reduce (+)
@@ -99,11 +99,11 @@ let main _ =
 
     let now = DateTime.Now
     let topOfMin = DateTime(
-                    now.Year, 
-                    now.Month, 
-                    now.Day, 
-                    now.Hour, 
-                    (if (now.Second > 30) then now.Minute+1 else now.Minute), 
+                    now.Year,
+                    now.Month,
+                    now.Day,
+                    now.Hour,
+                    (if (now.Second > 30) then now.Minute+1 else now.Minute),
                     (if (now.Second > 30) then 0 else 30))
 
     let due = topOfMin-now

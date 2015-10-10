@@ -14,7 +14,7 @@ module Seq =
                vs
                |> Seq.sortBy(fun (_, i, _) -> i)
                |> Seq.map (fun (_, _, v) -> v)
-               |> Seq.ToList)
+               |> Seq.toList)
 
 let base32encode (data : byte []) =
     let leftover = data.Length % 5

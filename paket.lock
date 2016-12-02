@@ -3,7 +3,7 @@ NUGET
   remote: https://www.nuget.org/api/v2
   specs:
     FAKE (4.22.6)
-    FSharp.Control.Reactive (3.2.0)
+    FSharp.Control.Reactive (3.2)
       FSharp.Core (>= 3.1.2)
       Rx-Core (>= 2.2.5)
       Rx-Interfaces (>= 2.2.5)

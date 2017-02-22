@@ -1,6 +1,6 @@
 redirects: on
 source https://nuget.org/api/v2
-framework: net45
+framework: net461
 
 nuget FAKE
 nuget FSharp.Control.Reactive
